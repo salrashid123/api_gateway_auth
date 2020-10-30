@@ -1,5 +1,5 @@
 
-## API Gateway -> Cloud RUn Auth Helloworld
+## API Gateway -> Cloud Run Auth Helloworld
 
 Simple tutorial to secure an API you deploy on Cloud Run behind GCP [API Gateway](https://cloud.google.com/api-gateway/docs)
 
@@ -39,6 +39,7 @@ gcloud iam service-accounts keys  create svc_client.json --iam-account=api-clien
 ```bash
 
 # build and deploy
+cd app/
 gcloud builds submit --tag gcr.io/$PROJECT_ID/apiserver .
 
 gcloud beta run deploy apiserver  --image gcr.io/$PROJECT_ID/apiserver \
@@ -89,14 +90,7 @@ gcloud run services add-iam-policy-binding apiserver --region us-central1 \
 
 ### Deploy Gateway
 
-Allow the API Gateway's service account permissions to do admin stuff (TODO: there doens't seem to be a way to allow thsi service account permissions on specific APIs...its a binding at the project level, unfortunately)
-
-```bash
-gcloud projects add-iam-policy-binding $PROJECT_ID  \
-   --member serviceAccount:gateway-sa@$PROJECT_ID.iam.gserviceaccount.com   --role roles/apigateway.admin
-```
-
-Now edit `openapi2-run.yaml`, enter in the values here that you have for the backend API (remember to keep the trailing `/todo`)
+Edit `openapi2-run.yaml`, enter in the values here that you have for the backend API (remember to keep the trailing `/todo`)
 
 ```yaml
       x-google-backend:
@@ -124,7 +118,7 @@ audience through. Right, we're securing it such that any google issued OIDC toke
 Find the hostname of the gateway
 
 ```bash
-export GATEWAY_HOSTNAME=`gcloud beta api-gateway gateways describe gateway-1  --location=us-central1 --format="value(defaultHostname)"
+export GATEWAY_HOSTNAME=`gcloud beta api-gateway gateways describe gateway-1  --location=us-central1 --format="value(defaultHostname)"`
 ```
 
 Then `openapi2-run.yaml` and enter value under the security definitions of `x-google-audiences`
