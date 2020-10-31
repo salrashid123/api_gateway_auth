@@ -46,9 +46,9 @@ gcloud beta run deploy apiserver  --image gcr.io/$PROJECT_ID/apiserver \
    --region us-central1  --platform=managed  -q
 ```
 
-We need to find the auto-assigned URL for this api server...we're only doing this because i'm paranoid and have a handler in the deployed API that
-always decodes and verifies the inbound header (even if Cloud Run would validate it!)
-eg. see `authMiddleware()` middleware function in `main.go`
+We need to find the auto-assigned URL for this api server...we're only doing this because i'm paranoid and have a handler in the deployed API that always decodes and verifies the inbound header (even if Cloud Run would validate it!)
+
+eg. see `authMiddleware()` middleware function in `main.go`.  
 
 ```golang
 	router := mux.NewRouter()
@@ -60,6 +60,8 @@ eg. see `authMiddleware()` middleware function in `main.go`
 		Handler: authMiddleware(router),
 	}
 ```
+
+It is critical to use the `authMiddleware` check gainst the inbound `Authorization` if this app runs standalone without an _immediate_ [intercepting proxy](https://github.com/salrashid123/envoy_iap) (eg, if the api gateway someday allows traffic to prem apps).  You can also chain the middleware handlers to decode and validate the `X-Forwarded-Authorization` JWT that the gateway forwards.  This JWT header is sent by the client to gateway and is finally forwarded to the app.  If the inbound JWT token to the API gateway is a self-signed JWT (see [Using JWT to authenticate Users](https://cloud.google.com/api-gateway/docs/authenticating-users-jwt)), it could contain custom claims to validate (eg authorization claims).
 
 Anyway, fist find the URL
 

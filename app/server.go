@@ -95,7 +95,7 @@ func authMiddleware(h http.Handler) http.Handler {
 			return
 		}
 		log.Printf(string(requestDump))
-
+		//authHeader := r.Header.Get("X-Forwarded-Authorization")
 		authHeader := r.Header.Get("Authorization")
 
 		if authHeader == "" {
